@@ -6,15 +6,21 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.adilkhan.ilovezappos.databinding.ActivityProductBinding;
@@ -37,11 +43,17 @@ import static android.R.attr.bitmap;
 public class ProductActivity extends AppCompatActivity {
 
     ImageView im=null;
+    static Button notifCount;
+    static int mNotifCount = 0;
+    TextView t;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product);
+
+
 
         Bundle bundle = getIntent().getExtras();
         ArrayList<String> ax = new ArrayList<String>();
@@ -49,7 +61,6 @@ public class ProductActivity extends AppCompatActivity {
         System.out.print(ax.toString());
 
        im = (ImageView) findViewById(R.id.imageView2);
-
 
         String brandName= ax.get(0);
         String thumbnailImageUrl = ax.get(1);
@@ -95,6 +106,11 @@ public class ProductActivity extends AppCompatActivity {
         Animation animation1 =
                 AnimationUtils.loadAnimation(getApplicationContext(), R.anim.move);
         im.startAnimation(animation1);
+
+        t = (TextView) findViewById(R.id.textView6);
+        Integer result = Integer.valueOf(t.getText().toString());
+        Integer x = result + 1;
+        t.setText(x.toString());
     }
 /*
     private class GetXMLTask extends AsyncTask<String, Void, Bitmap> {

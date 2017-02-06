@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.example.adilkhan.ilovezappos.NetworkConnectivity;
 
 import org.json.*;
 
@@ -35,7 +36,15 @@ public class MainActivity extends AppCompatActivity {
         Log.d("adil",item);
        // String inputStreamAsString = "https://api.zappos.com/Search?term="+item+"&key=b743e26728e16b81da139182bb2094357c31d331";
        // JSONObject json = new JSONObject(inputStreamAsString);
-        new GetItems().execute(item);
+
+        if(NetworkConnectivity.checkInternetConnection(MainActivity.this))
+        {
+            new GetItems().execute(item);
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(),"Internet connection not avaliable!",Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -43,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Toast.makeText(MainActivity.this,"Json Data is downloading",Toast.LENGTH_LONG).show();
+      //  Toast.makeText(MainActivity.this,"Json Data is downloading",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -71,16 +80,29 @@ public class MainActivity extends AppCompatActivity {
         if (jsonStr != null) {
             try {
                 JSONObject jsonObj = new JSONObject(jsonStr);
-
+                String check = jsonObj.getString("currentResultCount");
+                Log.d("adil",check);
+                if(check.equals("0"))
+                {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(),
+                                    "Json error: ",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
                 // Getting JSON Array node
-                JSONArray contacts = jsonObj.getJSONArray("results");
+                else {
+                    JSONArray contacts = jsonObj.getJSONArray("results");
 
 
                     JSONObject c = contacts.getJSONObject(0);
                     brandName = c.getString("brandName");
                     Log.d("adil", brandName);
                     thumbnail = c.getString("thumbnailImageUrl");
-                    Log.d("adil",thumbnail);
+                    Log.d("adil", thumbnail);
                     productID = c.getString("productId");
                     originalPrice = c.getString("originalPrice");
                     styleId = c.getString("styleId");
@@ -90,8 +112,9 @@ public class MainActivity extends AppCompatActivity {
                     productUrl = c.getString("productUrl");
                     productName = c.getString("productName");
 
-                   // ProductInfo p = new ProductInfo(brandName,thumbnail,productID,originalPrice,styleId,colorId,price,percentOff,productUrl,productName);
-                   // ProductDetails.add()
+
+                    // ProductInfo p = new ProductInfo(brandName,thumbnail,productID,originalPrice,styleId,colorId,price,percentOff,productUrl,productName);
+                    // ProductDetails.add()
                     ProductDetails.add(brandName);
                     ProductDetails.add(thumbnail);
                     ProductDetails.add(productID);
@@ -102,18 +125,8 @@ public class MainActivity extends AppCompatActivity {
                     ProductDetails.add(percentOff);
                     ProductDetails.add(productUrl);
                     ProductDetails.add(productName);
-                   /* // tmp hash map for single contact
-                    HashMap<String, String> contact = new HashMap<>();
 
-                    // adding each child node to HashMap key => value
-                    contact.put("id", id);
-                    contact.put("name", name);
-                    contact.put("email", email);
-                    contact.put("mobile", mobile);
-
-                    // adding contact to contact list
-                    contactList.add(contact);*/
-
+                }
             } catch (final JSONException e) {
                 Log.e("adil", "Json parsing error: " + e.getMessage());
                 runOnUiThread(new Runnable() {
@@ -143,19 +156,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPostExecute(ArrayList<String> result) {
-        //super.onPostExecute(result);
-       /* ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList,
-                R.layout.list_item, new String[]{ "email","mobile"},
-                new int[]{R.id.email, R.id.mobile});
-        lv.setAdapter(adapter);
-    */
-        //Log.d("adil",result);
 
-        Intent i = new Intent(MainActivity.this, ProductActivity.class);
-        i.putExtra("message", result);
-        i.putStringArrayListExtra("Info",result);
-// Starts TargetActivity
-        startActivity(i);
+        if(!result.isEmpty()) {
+            Intent i = new Intent(MainActivity.this, ProductActivity.class);
+            i.putExtra("message", result);
+            i.putStringArrayListExtra("Info", result);
+            startActivity(i);
+        }
 
     }
 }
